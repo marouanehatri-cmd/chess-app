@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="ar"><head><meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Marouane Chess</title>
+<title>Chess</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <style>
 :root{--bg:#f4f1ea;--fg:#222;--l:#eed9b6;--d:#b58863;--sel:#f6e05e;--hint:#4caf5099;--card:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -10,7 +10,7 @@
 html,body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif}
 .w{max-width:480px;margin:0 auto;padding:12px}
 h1{font-size:18px;margin:4px 0 10px;text-align:center}
-#b{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));width:100%;aspect-ratio:1;border-radius:6px;overflow:hidden;user-select:none}
+#b{direction:ltr;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));width:100%;aspect-ratio:1;border-radius:6px;overflow:hidden;user-select:none}
 .s{aspect-ratio:1;min-width:0;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:min(9vw,42px);position:relative;cursor:pointer;line-height:1}
 .s.l{background:var(--l)}.s.d{background:var(--d)}
 .s.sel{background:var(--sel)!important}
@@ -18,31 +18,47 @@ h1{font-size:18px;margin:4px 0 10px;text-align:center}
 .s.last{box-shadow:inset 0 0 0 3px #e0a800}
 .wp{color:#fff;text-shadow:0 0 2px #000,0 0 2px #000,0 0 3px #000}.bp{color:#111}
 .bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-button,select{flex:1;min-width:30%;padding:10px;border-radius:8px;border:1px solid #8885;background:var(--card);color:var(--fg);font-size:15px}
+button,select,input{flex:1;min-width:30%;padding:10px;border-radius:8px;border:1px solid #8885;background:var(--card);color:var(--fg);font-size:15px;box-sizing:border-box}
 #st{margin-top:10px;text-align:center;min-height:22px;font-weight:600}
 #eng{text-align:center;font-size:12px;opacity:.7;margin-top:2px}
 #an{margin-top:10px;font-size:14px}
-.mv{display:inline-block;padding:3px 6px;margin:2px;border-radius:6px;background:var(--card);border:1px solid #8884;cursor:pointer;font-size:13px}
+.mv{direction:ltr;display:inline-block;padding:3px 6px;margin:2px;border-radius:6px;background:var(--card);border:1px solid #8884;cursor:pointer;font-size:13px}
 .e1{border-color:#e0a800}.e2{border-color:#e67e22}.e3{border-color:#d33;background:#d332}
+.gr{display:block;width:100%;text-align:start;padding:9px;margin:4px 0;border-radius:8px;border:1px solid #8884;background:var(--card);cursor:pointer;font-size:13px}
+h2{font-size:15px;margin:16px 0 4px}
 textarea{width:100%;box-sizing:border-box;height:80px;margin-top:10px;border-radius:8px;border:1px solid #8885;background:var(--card);color:var(--fg);padding:8px}
 svg{width:100%;height:80px;background:var(--card);border-radius:8px;margin-top:6px}
 </style></head><body><div class="w">
+<div class="bar" style="margin:0 0 6px"><button id="lg" style="flex:0 0 auto;min-width:0">العربية</button></div>
 <h1>♞ Chess Engine</h1>
-<div id="b"></div><div id="st"></div><div id="eng">...</div>
-<div class="bar"><select id="lv"><option value="1">سهل</option><option value="2" selected>متوسط</option><option value="3">صعيب</option><option value="4">خبير 2500+</option></select>
-<button id="nw">لعبة جديدة</button><button id="un">رجوع</button><button id="fl">قلب الرقعة</button><button id="ba">🔍 تحليل المباراة</button></div>
+<div id="b"></div><div id="st"></div><div id="eng"></div>
+<div class="bar"><select id="lv"><option value="1"></option><option value="2" selected></option><option value="3"></option><option value="4"></option></select>
+<button id="nw" data-i="nw"></button><button id="un" data-i="un"></button><button id="fl" data-i="fl"></button><button id="ba" data-i="ba"></button></div>
 <div id="an"></div>
-<textarea id="pg" placeholder="لصق PGN هنا (من chess.com مثلا) ومن بعد ضغط 'تحميل PGN'"></textarea>
-<div class="bar"><button id="cp">📋 نسخ PGN</button><button id="ld">⬆ تحميل PGN</button></div>
+<h2 data-i="cc"></h2>
+<div class="bar"><input id="cu" data-p="user" autocapitalize="none" autocomplete="off"><button id="fg" data-i="find"></button></div>
+<div id="gl"></div>
+<textarea id="pg" data-p="ph"></textarea>
+<div class="bar"><button id="cp" data-i="cp"></button><button id="ld" data-i="ld"></button></div>
 </div>
 <script>
+const T={en:{lvl1:'Easy',lvl2:'Medium',lvl3:'Hard',lvl4:'Expert 2500+',nw:'New game',un:'Undo',fl:'Flip board',ba:'🔍 Analyze game',cp:'📋 Copy PGN',ld:'⬆ Load PGN',ph:'Paste a PGN here, then tap "Load PGN"',cc:'My chess.com games',user:'chess.com username',find:'Find my games',turn:'Your turn',bturn:'Black to move',chk:'Check! ',mw:'Checkmate — you win! 🎉',ml:'Checkmate — engine wins 🤖',dr:'Draw 🤝',th:'Thinking...',vw:'Analysis view — tap New game or Undo to exit',cpd:'PGN copied ✓',ldd:'Game loaded ✓ — tap Analyze',bad:'Invalid PGN',nm:'No moves yet',anl:'Analyzing... ',wh:'White',bl:'Black',avg:'avg loss',ina:'inaccuracies',mis:'mistakes',blu:'blunders',eS:'Engine: Stockfish.js',eI:'Engine: built-in (~1800 Elo)',srch:'Searching...',nf:'User not found',ne:'Network error. Game search works inside the APK (not in the Claude preview).',nog:'No games found',win:'Win',loss:'Loss',drw:'Draw',vs:'vs',as:'as'},
+ar:{lvl1:'سهل',lvl2:'متوسط',lvl3:'صعب',lvl4:'خبير 2500+',nw:'لعبة جديدة',un:'تراجع',fl:'قلب الرقعة',ba:'🔍 تحليل المباراة',cp:'📋 نسخ PGN',ld:'⬆ تحميل PGN',ph:'الصق PGN هنا ثم اضغط «تحميل PGN»',cc:'مبارياتي على chess.com',user:'اسم المستخدم في chess.com',find:'ابحث عن مبارياتي',turn:'دورك',bturn:'دور الأسود',chk:'كش! ',mw:'كش مات — لقد فزت! 🎉',ml:'كش مات — فاز المحرك 🤖',dr:'تعادل 🤝',th:'يفكر...',vw:'وضع التحليل — اضغط لعبة جديدة أو تراجع للخروج',cpd:'تم نسخ PGN ✓',ldd:'تم تحميل المباراة ✓ — اضغط تحليل',bad:'PGN غير صالح',nm:'لا توجد حركات بعد',anl:'جارٍ التحليل... ',wh:'الأبيض',bl:'الأسود',avg:'متوسط الخسارة',ina:'حركات غير دقيقة',mis:'أخطاء',blu:'أخطاء فادحة',eS:'المحرك: Stockfish.js',eI:'المحرك: داخلي (~1800 Elo)',srch:'جارٍ البحث...',nf:'المستخدم غير موجود',ne:'خطأ في الشبكة. البحث عن المباريات يعمل داخل تطبيق APK (وليس في معاينة Claude).',nog:'لم يتم العثور على مباريات',win:'فوز',loss:'خسارة',drw:'تعادل',vs:'ضد',as:'بـ'}};
+let lang='en';try{lang=localStorage.getItem('lg')||'en'}catch(e){}
+const t=k=>T[lang][k];
 const g=new Chess(),U={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'},V={p:100,n:320,b:330,r:500,q:900,k:0};
 const LV={1:[2,300],2:[3,1500],3:[5,4000],4:[6,6000]},SK={1:3,2:10,3:17,4:20},MT={1:200,2:500,3:1000,4:2000};
-let sel=null,targets=[],last=null,busy=false,flip=false,viewFen=null,vl=null,fens=[],hist=[];
+let sel=null,targets=[],last=null,busy=false,flip=false,viewFen=null,vl=null,fens=[],hist=[],msg='';
 const $=id=>document.getElementById(id);
-/* ---- Stockfish.js worker (إذا تحمل) ---- */
+function apply(){document.documentElement.lang=lang;document.documentElement.dir=lang=='ar'?'rtl':'ltr';
+document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));
+document.querySelectorAll('[data-p]').forEach(e=>e.placeholder=t(e.dataset.p));
+[1,2,3,4].forEach(i=>$('lv').options[i-1].textContent=t('lvl'+i));
+$('lg').textContent=lang=='ar'?'English':'العربية';setEng();draw()}
+$('lg').onclick=()=>{lang=lang=='ar'?'en':'ar';try{localStorage.setItem('lg',lang)}catch(e){}msg='';apply()};
+/* Stockfish.js worker */
 let sf=null,sfReady=false,job=null;
-function setEng(){$('eng').textContent=sfReady?'المحرك: Stockfish.js':'المحرك: داخلي (~1800 Elo)'}
+function setEng(){$('eng').textContent=t(sfReady?'eS':'eI')}
 function initSF(){try{const b=new Blob(['importScripts("https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js")'],{type:'text/javascript'});
 sf=new Worker(URL.createObjectURL(b));sf.onmessage=e=>onSF(String(e.data));sf.onerror=()=>{sf=null;sfReady=false;setEng()};sf.postMessage('uci');
 setTimeout(()=>{if(!sfReady){try{sf&&sf.terminate()}catch(e){}sf=null;setEng()}},10000)}catch(e){sf=null}setEng()}
@@ -51,7 +67,7 @@ const m=l.match(/score (cp|mate) (-?\d+)/);if(m&&job){job.t=m[1];job.v=+m[2]}
 if(l.startsWith('bestmove')&&job){const j=job;job=null;j.best=l.split(' ')[1];j.res(j)}}
 function sfGo(fen,go){return new Promise(res=>{const j={res};job=j;sf.postMessage('position fen '+fen);sf.postMessage('go '+go);
 setTimeout(()=>{if(job===j){job=null;res({best:null})}},20000)})}
-/* ---- المحرك الداخلي ---- */
+/* built-in engine */
 function cen(r,c){return 3.5-Math.max(Math.abs(r-3.5),Math.abs(c-3.5))}
 function ev(){let s=0;const bd=g.board();
 for(let r=0;r<8;r++)for(let c=0;c<8;c++){const p=bd[r][c];if(!p)continue;
@@ -81,14 +97,14 @@ for(let d=1;d<=md;d++){to=false;let bs=-1e9,bm=null,a=-1e9;
 for(const m of order(all,best&&best.san)){g.move(m);const s=-srch(d-1,-1e9,-a,1);g.undo();if(to)break;if(s>bs){bs=s;bm=m}if(s>a)a=s}
 if(to)break;if(bm)best=bm;if(bs>90000)break}
 return best||all[Math.floor(Math.random()*all.length)]}
-/* ---- الواجهة ---- */
+/* UI */
 function draw(){const src=viewFen?new Chess(viewFen):g,bd=src.board(),el=$('b'),hl=viewFen?vl:last;el.innerHTML='';
 for(let R=0;R<8;R++)for(let C=0;C<8;C++){const r=flip?7-R:R,c=flip?7-C:C,sq='abcdefgh'[c]+(8-r),d=document.createElement('div');
 d.className='s '+((r+c)%2?'d':'l')+(sel==sq?' sel':'')+(targets.includes(sq)?' h':'')+(hl&&(hl.from==sq||hl.to==sq)?' last':'');
 const p=bd[r][c];if(p){d.textContent=U[p.type];d.classList.add(p.color=='w'?'wp':'bp')}
 d.onclick=()=>tap(sq);el.appendChild(d)}
-$('st').textContent=viewFen?'وضعية التحليل (ضغط على لعبة جديدة/رجوع باش تخرج)':g.in_checkmate()?(g.turn()=='w'?'كش مات — المحرك ربح 🤖':'كش مات — ربحتي! 🎉'):g.game_over()?'تعادل 🤝':busy?'كيفكر...':(g.in_check()?'كش! ':'')+(g.turn()=='w'?'دورك':'دور الأسود')}
-function tap(sq){if(busy||viewFen||g.game_over()||g.turn()!='w')return;
+$('st').textContent=msg||(viewFen?t('vw'):g.in_checkmate()?t(g.turn()=='w'?'ml':'mw'):g.game_over()?t('dr'):busy?t('th'):(g.in_check()?t('chk'):'')+t(g.turn()=='w'?'turn':'bturn'))}
+function tap(sq){msg='';if(busy||viewFen||g.game_over()||g.turn()!='w')return;
 if(sel&&targets.includes(sq)){last=g.move({from:sel,to:sq,promotion:'q'});sel=null;targets=[];busy=true;draw();setTimeout(bot,60);return}
 const p=g.get(sq);if(p&&p.color=='w'){sel=sq;targets=g.moves({square:sq,verbose:true}).map(m=>m.to)}else{sel=null;targets=[]}
 draw()}
@@ -96,32 +112,50 @@ async function bot(){if(g.game_over()){busy=false;draw();return}let mv=null;cons
 if(sf&&sfReady){sf.postMessage('setoption name Skill Level value '+SK[lv]);const r=await sfGo(g.fen(),'movetime '+MT[lv]);
 if(r.best&&r.best!='(none)')mv={from:r.best.slice(0,2),to:r.best.slice(2,4),promotion:r.best[4]}}
 if(!mv)mv=pick();last=g.move(mv);busy=false;draw()}
-function reset(){viewFen=null;sel=null;targets=[];last=null;$('an').innerHTML=''}
-$('nw').onclick=()=>{if(busy)return;g.reset();reset();draw()};
+function reset(){viewFen=null;sel=null;targets=[];last=null;msg='';$('an').innerHTML=''}
+$('nw').onclick=()=>{if(busy)return;g.reset();reset();flip=false;draw()};
 $('un').onclick=()=>{if(busy)return;viewFen=null;g.undo();g.undo();reset();draw()};
 $('fl').onclick=()=>{flip=!flip;draw()};
-/* ---- PGN ---- */
-$('cp').onclick=()=>{const t=$('pg');t.value=g.pgn();t.select();try{navigator.clipboard&&navigator.clipboard.writeText(t.value)}catch(e){}try{document.execCommand('copy')}catch(e){}$('st').textContent='تنسخ PGN ✓'};
-$('ld').onclick=()=>{if(busy)return;const t=$('pg').value.trim();if(t&&g.load_pgn(t,{sloppy:true})){reset();draw();$('st').textContent='تحملات المباراة ✓ — ضغط على تحليل'}else $('st').textContent='PGN ماشي صحيح'};
-/* ---- تحليل المباراة ---- */
+/* PGN */
+function loadPGN(p){if(g.load_pgn(p,{sloppy:true}))return true;return g.load_pgn(p.replace(/\{[^}]*\}/g,'').replace(/\d+\.\.\./g,''),{sloppy:true})}
+$('cp').onclick=()=>{const x=$('pg');x.value=g.pgn();x.select();try{navigator.clipboard&&navigator.clipboard.writeText(x.value)}catch(e){}try{document.execCommand('copy')}catch(e){}msg=t('cpd');draw()};
+$('ld').onclick=()=>{if(busy)return;const x=$('pg').value.trim();if(x&&loadPGN(x)){reset();msg=t('ldd');draw()}else{msg=t('bad');draw()}};
+/* chess.com */
+let CG=[],CU='';
+$('fg').onclick=async()=>{const u=$('cu').value.trim().toLowerCase();if(!u)return;CU=u;$('gl').textContent=t('srch');
+try{const r=await fetch('https://api.chess.com/pub/player/'+encodeURIComponent(u)+'/games/archives');
+if(r.status==404){$('gl').textContent=t('nf');return}
+const a=(await r.json()).archives||[];let G=[];
+for(const url of a.slice(-3).reverse()){const x=await(await fetch(url)).json();G=G.concat((x.games||[]).reverse());if(G.length>=25)break}
+CG=G.filter(x=>x.pgn).slice(0,25);
+if(!CG.length){$('gl').textContent=t('nog');return}
+$('gl').innerHTML='';
+CG.forEach((x,i)=>{const w=x.white.username.toLowerCase()==u,me=w?x.white:x.black,op=w?x.black:x.white;
+const res=me.result=='win'?'win':['checkmated','resigned','timeout','abandoned','lose'].includes(me.result)?'loss':'drw';
+const d=new Date(x.end_time*1000).toLocaleDateString(),b=document.createElement('button');
+b.className='gr';b.textContent=(res=='win'?'✅ ':res=='loss'?'❌ ':'➖ ')+t(res)+' · '+t('vs')+' '+op.username+' ('+op.rating+') · '+t('as')+' '+t(w?'wh':'bl')+' · '+x.time_class+' · '+d;
+b.onclick=()=>{if(busy)return;if(loadPGN(x.pgn)){reset();flip=!w;msg=t('ldd');draw();window.scrollTo(0,0)}else{msg=t('bad');draw()}};
+$('gl').appendChild(b)})}
+catch(e){$('gl').textContent=t('ne')}};
+/* analysis */
 async function evalFen(fen){const c=new Chess(fen);if(c.in_checkmate())return c.turn()=='w'?-1000:1000;if(c.game_over())return 0;let v;
 if(sf&&sfReady){const j=await sfGo(fen,'movetime 300');v=j.t=='mate'?(j.v>0?1000:-1000):(j.v||0)}
 else{g.load(fen);dl=Date.now()+700;v=0;for(let d=1;d<=3;d++){to=false;const s=srch(d,-1e9,1e9,0);if(to)break;v=s}}
 if(c.turn()=='b')v=-v;return Math.max(-1000,Math.min(1000,v))}
-$('ba').onclick=async()=>{if(busy)return;hist=g.history({verbose:true});if(!hist.length){$('st').textContent='ما كاين حتى حركة';return}
-busy=true;viewFen=null;const pgn=g.pgn(),t=new Chess();fens=[t.fen()];
-for(const m of hist){t.move({from:m.from,to:m.to,promotion:m.promotion});fens.push(t.fen())}
+$('ba').onclick=async()=>{if(busy)return;hist=g.history({verbose:true});if(!hist.length){msg=t('nm');draw();return}
+busy=true;viewFen=null;msg='';const pgn=g.pgn(),tt=new Chess();fens=[tt.fen()];
+for(const m of hist){tt.move({from:m.from,to:m.to,promotion:m.promotion});fens.push(tt.fen())}
 if(sf&&sfReady)sf.postMessage('setoption name Skill Level value 20');
-const E=[];for(let i=0;i<fens.length;i++){$('an').textContent='كنحلل... '+i+'/'+(fens.length-1);await new Promise(r=>setTimeout(r,0));E.push(await evalFen(fens[i]))}
-g.load_pgn(pgn);busy=false;
+const E=[];for(let i=0;i<fens.length;i++){$('an').textContent=t('anl')+i+'/'+(fens.length-1);await new Promise(r=>setTimeout(r,0));E.push(await evalFen(fens[i]))}
+loadPGN(pgn);busy=false;
 const L={w:[],b:[]},cnt={w:[0,0,0],b:[0,0,0]};let h='';
 hist.forEach((m,i)=>{const loss=Math.max(0,m.color=='w'?E[i]-E[i+1]:E[i+1]-E[i]);L[m.color].push(loss);
 const k=loss>=300?3:loss>=150?2:loss>=70?1:0;if(k)cnt[m.color][k-1]++;
 const lab=['','?!','?','??'][k];h+=`<span class="mv e${k}" data-i="${i}">${i%2?'':(i/2+1|0)+'.'}${m.san}${lab}</span>`});
 const av=a=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):0;
+const line=(c,n)=>`<b>${t(n)}:</b> ${t('avg')} ${av(L[c])}cp — ${cnt[c][0]} ${t('ina')} / ${cnt[c][1]} ${t('mis')} / ${cnt[c][2]} ${t('blu')}`;
 const pts=E.map((e,i)=>(i/(E.length-1||1)*300).toFixed(1)+','+(40-e/1000*38).toFixed(1)).join(' ');
-$('an').innerHTML=`<b>النتيجة:</b> الأبيض: متوسط الخسارة ${av(L.w)}cp — (غير دقيق ${cnt.w[0]} / خطأ ${cnt.w[1]} / فادح ${cnt.w[2]})<br>الأسود: ${av(L.b)}cp — (${cnt.b[0]} / ${cnt.b[1]} / ${cnt.b[2]})
-<svg viewBox="0 0 300 80" preserveAspectRatio="none"><line x1="0" y1="40" x2="300" y2="40" stroke="gray" stroke-dasharray="3"/><polyline fill="none" stroke="#4caf50" stroke-width="2" points="${pts}"/></svg><div style="margin-top:6px">${h}</div>`;
-document.querySelectorAll('.mv').forEach(el=>el.onclick=()=>{const i=+el.dataset.i;viewFen=fens[i+1];vl=hist[i];sel=null;targets=[];draw()});draw()};
-draw();initSF();
+$('an').innerHTML=`${line('w','wh')}<br>${line('b','bl')}<svg viewBox="0 0 300 80" preserveAspectRatio="none"><line x1="0" y1="40" x2="300" y2="40" stroke="gray" stroke-dasharray="3"/><polyline fill="none" stroke="#4caf50" stroke-width="2" points="${pts}"/></svg><div style="margin-top:6px;direction:ltr">${h}</div>`;
+document.querySelectorAll('.mv').forEach(el=>el.onclick=()=>{const i=+el.dataset.i;viewFen=fens[i+1];vl=hist[i];sel=null;targets=[];msg='';draw()});draw()};
+apply();initSF();
 </script></body></html>
